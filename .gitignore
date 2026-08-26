@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+backend/database/datacurate.db
+backend/storage/raw/*.csv
+backend/storage/curated/*.csv
+.pytest_cache/
