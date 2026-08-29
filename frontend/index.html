@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DataCurate · Dataset Curation</title>
+
+    <!-- ===== STYLES ===== -->
+    <style>
+        /* ---------- 1. Design Tokens ---------- */
+        :root {
+            --color-bg: #f6f8fc;
+            --color-surface: #ffffff;
+            --color-text: #1e293b;
+            --color-text-secondary: #475569;
+            --color-text-muted: #94a3b8;
+            --color-primary: #2563eb;
+            --color-primary-hover: #1d4ed8;
+            --color-primary-light: #dbeafe;
+            --color-success: #16a34a;
+            --color-success-bg: #dcfce7;
+            --color-warning: #f59e0b;
+            --color-warning-bg: #fef9c3;
+            --color-danger: #dc2626;
+            --color-danger-bg: #fee2e2;
+            --color-neutral: #94a3b8;
+            --color-border: #e2e8f0;
+            --radius: 12px;
+            --radius-sm: 6px;
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.04);
+            --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.08);
+            --font: Inter, system-ui, -apple-system, sans-serif;
+            --transition: 0.2s ease;
+        }
+
+        /* ---------- 2. Reset & Base ---------- */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font);
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.5;
+            padding: 24px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        /* ---------- 3. App Shell ---------- */
+        #app {
+            max-width: 1280px;
+            width: 100%;
+            background: var(--color-surface);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            padding: 32px 36px 40px;
+            transition: opacity 0.3s ease;
+        }
+
+        /* ---------- 4. Typography ---------- */
+        h1, h2, h3, h4, h5 {
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+        h1 { font-size: 1.75rem; }
+        h2 { font-size: 1.35rem; margin-bottom: 0.5rem; }
+        h3 { font-size: 1.05rem; margin-bottom: 0.25rem; }
+        a {
+            color: var(--color-primary);
+            text-decoration: none;
+        }
+        a:hover { text-decoration: underline; }
+
+        /* ---------- 5. Utilities ---------- */
+        .text-muted { color: var(--color-text-muted); }
+        .text-secondary { color: var(--color-text-secondary); }
+        .flex { display: flex; }
+        .flex-wrap { flex-wrap: wrap; }
+        .items-center { align-items: center; }
+        .gap-1 { gap: 8px; }
+        .gap-2 { gap: 16px; }
+        .gap-3 { gap: 24px; }
+        .gap-4 { gap: 32px; }
+        .mt-1 { margin-top: 8px; }
+        .mt-2 { margin-top: 16px; }
+        .mt-3 { margin-top: 24px; }
+        .mt-4 { margin-top: 32px; }
+        .mb-1 { margin-bottom: 8px; }
+        .mb-2 { margin-bottom: 16px; }
+        .mb-3 { margin-bottom: 24px; }
+        .text-center { text-align: center; }
+        .w-full { width: 100%; }
+
+        /* ---------- 6. Buttons ---------- */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 22px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background var(--transition), transform 0.1s ease;
+            background: var(--color-neutral);
+            color: #fff;
+        }
+        .btn:hover { transform: translateY(-1px); }
+        .btn:active { transform: translateY(0); }
+        .btn-primary {
+            background: var(--color-primary);
+            color: #fff;
+        }
+        .btn-primary:hover { background: var(--color-primary-hover); }
+        .btn-success {
+            background: var(--color-success);
+            color: #fff;
+        }
+        .btn-success:hover { background: #15803d; }
+        .btn-danger {
+            background: var(--color-danger);
+            color: #fff;
+        }
+        .btn-danger:hover { background: #b91c1c; }
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid var(--color-border);
+            color: var(--color-text-secondary);
+        }
+        .btn-outline:hover {
+            background: var(--color-bg);
+            border-color: var(--color-text-muted);
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* ---------- 7. Cards ---------- */
+        .card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            box-shadow: var(--shadow);
+            transition: box-shadow var(--transition);
+        }
+        .card:hover { box-shadow: var(--shadow-lg); }
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+        .stat-card {
+            text-align: center;
+            padding: 18px 12px;
+        }
+        .stat-card .number {
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        .stat-card .label {
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .stat-card .badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-top: 4px;
+        }
+        .badge-success {
+            background: var(--color-success-bg);
+            color: var(--color-success);
+        }
+        .badge-warning {
+            background: var(--color-warning-bg);
+            color: var(--color-warning);
+        }
+        .badge-danger {
+            background: var(--color-danger-bg);
+            color: var(--color-danger);
+        }
+        .badge-neutral {
+            background: var(--color-border);
+            color: var(--color-text-secondary);
+        }
+
+        /* ---------- 8. Upload Zone ---------- */
+        .upload-zone {
+            border: 2.5px dashed var(--color-border);
+            border-radius: var(--radius);
+            padding: 48px 24px;
+            text-align: center;
+            transition: border-color var(--transition), background var(--transition);
+            background: var(--color-bg);
+            cursor: pointer;
+        }
+        .upload-zone.dragover {
+            border-color: var(--color-primary);
+            background: var(--color-primary-light);
+        }
+        .upload-zone .icon {
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 12px;
+        }
+        .upload-zone .sub {
+            color: var(--color-text-secondary);
+            font-size: 0.9rem;
+        }
+        .upload-zone .filename {
+            font-weight: 600;
+            margin-top: 8px;
+        }
+        .upload-zone .file-info {
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+            margin-top: 4px;
+        }
+        .upload-zone input[type="file"] {
+            display: none;
+        }
+
+        /* ---------- 9. Tables ---------- */
+        .table-wrap {
+            overflow-x: auto;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--color-border);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        th, td {
+            padding: 10px 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--color-border);
+        }
+        th {
+            background: var(--color-bg);
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--color-text-secondary);
+        }
+        tr:last-child td { border-bottom: none; }
+        .table-wrap .row-num {
+            color: var(--color-text-muted);
+            font-weight: 400;
+            width: 40px;
+        }
+
+        /* ---------- 10. Quality Score Ring ---------- */
+        .score-ring {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: conic-gradient(var(--color-primary) var(--pct, 0%),
+                    var(--color-border) var(--pct, 0%));
+            position: relative;
+            flex-shrink: 0;
+        }
+        .score-ring .inner {
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            background: var(--color-surface);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.5rem;
+            line-height: 1.2;
+        }
+        .score-ring .inner small {
+            font-size: 0.65rem;
+            font-weight: 400;
+            color: var(--color-text-secondary);
+        }
+
+        /* ---------- 11. Problem List ---------- */
+        .problem-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--color-border);
+        }
+        .problem-item:last-child { border-bottom: none; }
+        .problem-item .count {
+            font-weight: 600;
+            background: var(--color-bg);
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+
+        /* ---------- 12. Timeline ---------- */
+        .timeline {
+            position: relative;
+            padding-left: 20px;
+            border-left: 2px solid var(--color-border);
+        }
+        .timeline-item {
+            padding: 6px 0 6px 20px;
+            position: relative;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -7px;
+            top: 12px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--color-primary);
+            border: 2px solid var(--color-surface);
+        }
+        .timeline-item .time {
+            font-size: 0.75rem;
+            color: var(--color-text-muted);
+        }
+
+        /* ---------- 13. Sections visibility ---------- */
+        .section {
+            display: none;
+            animation: fadeUp 0.3s ease;
+        }
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ---------- 14. Responsive ---------- */
+        @media (max-width: 768px) {
+            #app { padding: 20px 16px; }
+            .card-grid { grid-template-columns: repeat(2, 1fr); }
+            .stat-card .number { font-size: 1.5rem; }
+            .flex-wrap-on-mobile { flex-direction: column; }
+            .upload-zone { padding: 32px 16px; }
+            .score-ring { width: 80px; height: 80px; }
+            .score-ring .inner { width: 60px; height: 60px; font-size: 1.2rem; }
+        }
+        @media (max-width: 480px) {
+            .card-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .stat-card { padding: 12px 8px; }
+            .stat-card .number { font-size: 1.25rem; }
+        }
+
+        /* ---------- 15. Misc Helpers ---------- */
+        .hidden { display: none !important; }
+        .fade-in { animation: fadeUp 0.3s ease; }
+        .divider {
+            height: 1px;
+            background: var(--color-border);
+            margin: 24px 0;
+        }
+        .chip {
+            display: inline-block;
+            padding: 2px 12px;
+            border-radius: 20px;
+            background: var(--color-bg);
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+        }
+        .loading-dots::after {
+            content: '...';
+            animation: dots 1.2s steps(3, end) infinite;
+        }
+        @keyframes dots {
+            0% { content: ''; }
+            33% { content: '.'; }
+            66% { content: '..'; }
+            100% { content: '...'; }
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+
+        <!-- ============================================================ -->
+        <!--  HEADER                                                       -->
+        <!-- ============================================================ -->
+        <header style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:28px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <span style="font-size:1.8rem; font-weight:700; color:var(--color-primary);">DataCurate</span>
+                <span class="chip" style="background:var(--color-primary-light); color:var(--color-primary); font-weight:500;">v1.0</span>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <span class="chip" id="statusChip">⏸ idle</span>
+            </div>
+        </header>
+
+        <!-- ============================================================ -->
+        <!--  SECTION: UPLOAD (landing)                                    -->
+        <!-- ============================================================ -->
+        <section id="sectionUpload" class="section active">
+            <div style="max-width:680px; margin:0 auto; text-align:center; padding:20px 0 10px;">
+                <h1 style="font-size:2rem; margin-bottom:6px;">Inspect, Clean, Validate, Export</h1>
+                <p class="text-secondary" style="font-size:1.05rem; max-width:520px; margin:0 auto 32px;">
+                    Upload a CSV to start the curation workflow.
+                </p>
+
+                <!-- Upload Zone -->
+                <div class="upload-zone" id="uploadZone">
+                    <span class="icon">📄</span>
+                    <p style="font-weight:500; font-size:1.1rem;">Drop your CSV here or <strong>browse</strong></p>
+                    <p class="sub">Supports .csv files up to 10 MB</p>
+                    <div id="fileInfo" class="file-info" style="margin-top:12px;"></div>
+                    <input type="file" id="fileInput" accept=".csv" />
+                </div>
+
+                <div style="margin-top:20px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+                    <!-- ✅ CRITICAL FIX: added type="button" -->
+                    <button type="button" class="btn btn-primary" id="btnUpload" disabled>Analyze Dataset</button>
+                    <button type="button" class="btn btn-outline" id="btnResetUpload">↺ Clear</button>
+                </div>
+
+                <div id="uploadMessage" style="margin-top:18px; min-height:28px; font-size:0.95rem;"></div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!--  SECTION: DASHBOARD (main)                                    -->
+        <!-- ============================================================ -->
+        <section id="sectionDashboard" class="section">
+
+            <!-- ---- A. Dataset Header ---- -->
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:8px;">
+                <div>
+                    <h2 id="datasetName" style="font-size:1.5rem;">—</h2>
+                    <div style="display:flex; gap:16px; flex-wrap:wrap; font-size:0.9rem; color:var(--color-text-secondary); margin-top:2px;">
+                        <span id="datasetMeta">—</span>
+                        <span class="status-badge" id="datasetStatus" style="background:var(--color-warning-bg); color:var(--color-warning);">Needs Curation</span>
+                    </div>
+                </div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                    <button type="button" class="btn btn-outline" id="btnRefreshData" style="font-size:0.85rem;">⟳ Refresh</button>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- ---- B. Overview Cards ---- -->
+            <div class="card-grid" id="overviewCards">
+                <div class="card stat-card"><div class="number" id="statRows">—</div><div class="label">Records</div></div>
+                <div class="card stat-card"><div class="number" id="statCols">—</div><div class="label">Columns</div></div>
+                <div class="card stat-card"><div class="number" id="statMissing">—</div><div class="label">Missing Values</div></div>
+                <div class="card stat-card"><div class="number" id="statDuplicates">—</div><div class="label">Duplicates</div></div>
+            </div>
+
+            <!-- ---- C. Dataset Preview ---- -->
+            <div style="margin-top:24px;">
+                <h3>📋 Dataset Preview</h3>
+                <div class="table-wrap" id="previewWrap" style="margin-top:8px; max-height:280px; overflow-y:auto;">
+                    <table>
+                        <thead id="previewHead"></thead>
+                        <tbody id="previewBody"></tbody>
+                    </table>
+                    <div id="previewEmpty" style="padding:24px; text-align:center; color:var(--color-text-muted);">No data preview available.</div>
+                </div>
+            </div>
+
+            <!-- ---- D. Column Profile ---- -->
+            <div style="margin-top:28px;">
+                <h3>📊 Column Profile</h3>
+                <div class="table-wrap" style="margin-top:8px; max-height:300px; overflow-y:auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Column</th><th>Type</th><th>Missing</th><th>Unique</th><th>Min</th><th>Max</th><th>Mean</th>
+                            </tr>
+                        </thead>
+                        <tbody id="profileBody">
+                            <tr><td colspan="7" style="text-align:center; color:var(--color-text-muted);">No profile data.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ---- E. Quality Score ---- -->
+            <div style="margin-top:28px; display:flex; flex-wrap:wrap; gap:28px; align-items:center; background:var(--color-bg); border-radius:var(--radius); padding:20px 24px;">
+                <div style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
+                    <div class="score-ring" id="scoreRing" style="--pct:0%;">
+                        <div class="inner"><span id="scoreNumber">0</span><small>%</small></div>
+                    </div>
+                    <div>
+                        <div style="font-size:1.3rem; font-weight:600;" id="scoreLabel">—</div>
+                        <div style="font-size:0.85rem; color:var(--color-text-secondary);">Data Quality</div>
+                    </div>
+                </div>
+                <div style="display:flex; flex-wrap:wrap; gap:20px; flex:1; justify-content:space-around;">
+                    <div><span class="text-muted">Completeness</span><br><strong id="qCompleteness">—</strong></div>
+                    <div><span class="text-muted">Uniqueness</span><br><strong id="qUniqueness">—</strong></div>
+                    <div><span class="text-muted">Validity</span><br><strong id="qValidity">—</strong></div>
+                    <div><span class="text-muted">Consistency</span><br><strong id="qConsistency">—</strong></div>
+                </div>
+            </div>
+
+            <!-- ---- F. Problems Detected ---- -->
+            <div style="margin-top:28px;">
+                <h3>⚠️ Problems Detected</h3>
+                <div class="card" style="margin-top:8px;" id="problemsList">
+                    <div class="problem-item"><span>Missing Values</span><span class="count" id="probMissing">0</span></div>
+                    <div class="problem-item"><span>Duplicate Records</span><span class="count" id="probDuplicates">0</span></div>
+                    <div class="problem-item"><span>Invalid Values</span><span class="count" id="probInvalid">0</span></div>
+                    <div class="problem-item"><span>Inconsistent Values</span><span class="count" id="probInconsistent">0</span></div>
+                </div>
+            </div>
+
+            <!-- ---- G. Curation Actions ---- -->
+            <div style="margin-top:28px;">
+                <h3>⚙️ Curation Actions</h3>
+                <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:8px;">
+                    <button type="button" class="btn btn-primary" id="btnClean">🧹 Clean Dataset</button>
+                    <button type="button" class="btn btn-success" id="btnValidate">✔️ Validate Dataset</button>
+                    <button type="button" class="btn btn-outline" id="btnResetCuration">↺ Reset</button>
+                </div>
+                <div id="actionStatus" style="margin-top:12px; font-size:0.95rem; min-height:28px;"></div>
+            </div>
+
+            <!-- ---- H. Cleaning Results ---- -->
+            <div style="margin-top:24px;" id="cleaningResultsWrap">
+                <h3>🧼 Cleaning Results</h3>
+                <div class="card" style="margin-top:8px; background:var(--color-success-bg); border-color:var(--color-success);" id="cleaningResults">
+                    <p style="color:var(--color-text-secondary);">Run a cleaning action to see results here.</p>
+                </div>
+            </div>
+
+            <!-- ---- I. Validation Results ---- -->
+            <div style="margin-top:24px;">
+                <h3>✅ Validation Results</h3>
+                <div class="card" style="margin-top:8px;" id="validationResults">
+                    <p style="color:var(--color-text-secondary);">Run validation to see results here.</p>
+                </div>
+            </div>
+
+            <!-- ---- J. Metadata ---- -->
+            <div style="margin-top:28px;">
+                <h3>📝 Metadata</h3>
+                <div class="card" style="margin-top:8px; display:grid; grid-template-columns:repeat(auto-fit, minmax(180px,1fr)); gap:12px;" id="metadataCard">
+                    <div><span class="text-muted">Dataset Name</span><br><strong id="metaName">—</strong></div>
+                    <div><span class="text-muted">Format</span><br><strong id="metaFormat">—</strong></div>
+                    <div><span class="text-muted">Records</span><br><strong id="metaRows">—</strong></div>
+                    <div><span class="text-muted">Columns</span><br><strong id="metaCols">—</strong></div>
+                    <div><span class="text-muted">Quality Score</span><br><strong id="metaScore">—</strong></div>
+                    <div><span class="text-muted">Curated On</span><br><strong id="metaDate">—</strong></div>
+                </div>
+                <button type="button" class="btn btn-outline" style="margin-top:8px;" id="btnDownloadMetadata">📥 Download Metadata JSON</button>
+            </div>
+
+            <!-- ---- K. Curation History ---- -->
+            <div style="margin-top:28px;">
+                <h3>⏳ Curation History</h3>
+                <div class="card" style="margin-top:8px; max-height:200px; overflow-y:auto;">
+                    <div class="timeline" id="historyTimeline">
+                        <div class="timeline-item" style="color:var(--color-text-muted);">No history yet.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ---- L. Export ---- -->
+            <div style="margin-top:32px; padding:20px 24px; background:var(--color-bg); border-radius:var(--radius); display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:16px;">
+                <div>
+                    <div style="font-weight:600; font-size:1.1rem;">📥 Ready to Export</div>
+                    <div class="text-muted" style="font-size:0.9rem;">Your curated dataset is ready for download.</div>
+                </div>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <button type="button" class="btn btn-primary" id="btnDownloadCSV">⬇ Download Curated CSV</button>
+                    <button type="button" class="btn btn-outline" id="btnDownloadMetadata2">📄 Metadata JSON</button>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ============================================================ -->
+        <!--  FOOTER                                                       -->
+        <!-- ============================================================ -->
+        <div style="margin-top:32px; padding-top:16px; border-top:1px solid var(--color-border); font-size:0.8rem; color:var(--color-text-muted); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+            <span>DataCurate · Dataset Curation System</span>
+            <span id="footerStatus">⚡ Ready</span>
+        </div>
+
+    </div>
+
+    <!-- ============================================================ -->
+    <!--  JAVASCRIPT                                                   -->
+    <!-- ============================================================ -->
+    <script>
+        // =================================================================
+        //  1. STATE
+        // =================================================================
+        const state = {
+            datasetId: null,
+            datasetName: null,
+            filename: null,
+            rows: null,
+            cols: null,
+            missing: null,
+            duplicates: null,
+            preview: [],
+            profile: [],
+            quality: null,
+            problems: { missing: 0, duplicates: 0, invalid: 0, inconsistent: 0 },
+            cleaningResult: null,
+            validationResult: null,
+            metadata: null,
+            history: [],
+            isUploading: false,
+            isCleaning: false,
+            isValidating: false,
+            uploaded: false,
+        };
+
+        // =================================================================
+        //  2. DOM REFS
+        // =================================================================
+        const $ = (sel) => document.querySelector(sel);
+        const uploadZone = $('#uploadZone');
+        const fileInput = $('#fileInput');
+        const fileInfo = $('#fileInfo');
+        const btnUpload = $('#btnUpload');
+        const btnResetUpload = $('#btnResetUpload');
+        const uploadMessage = $('#uploadMessage');
+        const sectionUpload = $('#sectionUpload');
+        const sectionDashboard = $('#sectionDashboard');
+
+        const datasetName = $('#datasetName');
+        const datasetMeta = $('#datasetMeta');
+        const datasetStatus = $('#datasetStatus');
+        const statRows = $('#statRows');
+        const statCols = $('#statCols');
+        const statMissing = $('#statMissing');
+        const statDuplicates = $('#statDuplicates');
+        const previewHead = $('#previewHead');
+        const previewBody = $('#previewBody');
+        const previewEmpty = $('#previewEmpty');
+        const profileBody = $('#profileBody');
+        const scoreRing = $('#scoreRing');
+        const scoreNumber = $('#scoreNumber');
+        const scoreLabel = $('#scoreLabel');
+        const qCompleteness = $('#qCompleteness');
+        const qUniqueness = $('#qUniqueness');
+        const qValidity = $('#qValidity');
+        const qConsistency = $('#qConsistency');
+        const probMissing = $('#probMissing');
+        const probDuplicates = $('#probDuplicates');
+        const probInvalid = $('#probInvalid');
+        const probInconsistent = $('#probInconsistent');
+        const btnClean = $('#btnClean');
+        const btnValidate = $('#btnValidate');
+        const btnResetCuration = $('#btnResetCuration');
+        const actionStatus = $('#actionStatus');
+        const cleaningResults = $('#cleaningResults');
+        const validationResults = $('#validationResults');
+        const metaName = $('#metaName');
+        const metaFormat = $('#metaFormat');
+        const metaRows = $('#metaRows');
+        const metaCols = $('#metaCols');
+        const metaScore = $('#metaScore');
+        const metaDate = $('#metaDate');
+        const historyTimeline = $('#historyTimeline');
+        const btnDownloadCSV = $('#btnDownloadCSV');
+        const btnDownloadMetadata = $('#btnDownloadMetadata');
+        const btnDownloadMetadata2 = $('#btnDownloadMetadata2');
+        const btnRefreshData = $('#btnRefreshData');
+        const footerStatus = $('#footerStatus');
+        const statusChip = $('#statusChip');
+
+        // =================================================================
+        //  3. API BASE
+        // =================================================================
+        const API_BASE = 'http://localhost:8000';
+
+        // =================================================================
+        //  4. HELPERS
+        // =================================================================
+        function setStatus(text, isGood = true) {
+            statusChip.textContent = text;
+            statusChip.style.background = isGood ? 'var(--color-success-bg)' : 'var(--color-danger-bg)';
+            statusChip.style.color = isGood ? 'var(--color-success)' : 'var(--color-danger)';
+        }
+
+        function setFooter(text) { footerStatus.textContent = text; }
+
+        function showMessage(el, text, isError = false) {
+            el.textContent = text;
+            el.style.color = isError ? 'var(--color-danger)' : 'var(--color-text-secondary)';
+        }
+
+        function showActionStatus(text, isError = false) {
+            actionStatus.textContent = text;
+            actionStatus.style.color = isError ? 'var(--color-danger)' : 'var(--color-text-secondary)';
+        }
+
+        function formatDate() {
+            return new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
+        function safeText(val) {
+            if (val === null || val === undefined) return '—';
+            if (typeof val === 'number') return val;
+            return String(val);
+        }
+
+        // =================================================================
+        //  5. UPLOAD LOGIC
+        // =================================================================
+        let selectedFile = null;
+
+        function handleFile(file) {
+            if (!file) {
+                selectedFile = null;
+                fileInfo.textContent = '';
+                btnUpload.disabled = true;
+                return;
+            }
+            const ext = file.name.split('.').pop().toLowerCase();
+            if (ext !== 'csv') {
+                showMessage(uploadMessage, '❌ Please upload a .csv file.', true);
+                selectedFile = null;
+                fileInfo.textContent = '';
+                btnUpload.disabled = true;
+                return;
+            }
+            if (file.size > 10 * 1024 * 1024) {
+                showMessage(uploadMessage, '❌ File exceeds 10 MB limit.', true);
+                selectedFile = null;
+                fileInfo.textContent = '';
+                btnUpload.disabled = true;
+                return;
+            }
+            selectedFile = file;
+            fileInfo.textContent = `📎 ${file.name}  ·  ${(file.size / 1024).toFixed(0)} KB`;
+            btnUpload.disabled = false;
+            showMessage(uploadMessage, '✅ File ready for upload.', false);
+        }
+
+        uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+        uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length) { fileInput.files = files; handleFile(files[0]); }
+        });
+        uploadZone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) handleFile(e.target.files[0]);
+            else handleFile(null);
+        });
+
+        btnResetUpload.addEventListener('click', () => {
+            fileInput.value = '';
+            handleFile(null);
+            showMessage(uploadMessage, '');
+            uploadZone.classList.remove('dragover');
+        });
+
+        // ---- Upload API ----
+        // ✅ CRITICAL FIX: added event parameter and preventDefault()
+        btnUpload.addEventListener('click', async (event) => {
+            event.preventDefault();   // Stops page reload
+
+            if (!selectedFile) return;
+            if (state.isUploading) return;
+            state.isUploading = true;
+            btnUpload.disabled = true;
+            btnUpload.textContent = '⏳ Uploading...';
+            showMessage(uploadMessage, '⏳ Uploading and analyzing...', false);
+            setStatus('⏳ uploading');
+            setFooter('Uploading...');
+
+            try {
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+
+                console.log('📤 Uploading file:', selectedFile.name);
+                const resp = await fetch(`${API_BASE}/upload`, {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                console.log('📥 Response status:', resp.status);
+                if (!resp.ok) {
+                    const errText = await resp.text();
+                    throw new Error(errText || 'Upload failed');
+                }
+
+                const data = await resp.json();
+                console.log('📦 Upload response:', data);
+
+                state.datasetId = data.dataset_id || data.datasetId;
+                state.datasetName = data.filename || selectedFile.name;
+                state.filename = data.filename || selectedFile.name;
+                state.rows = data.rows || data.record_count || 0;
+                state.cols = data.columns || data.column_count || 0;
+                state.uploaded = true;
+
+                showMessage(uploadMessage, `✅ Uploaded successfully! Dataset ID: ${state.datasetId}`, false);
+                setStatus('✅ uploaded');
+                setFooter('Upload complete');
+
+                // switch to dashboard
+                sectionUpload.classList.remove('active');
+                sectionDashboard.classList.add('active');
+
+                // populate header
+                datasetName.textContent = state.datasetName;
+                datasetMeta.textContent = `CSV · ${state.rows} records · ${state.cols} columns`;
+                datasetStatus.textContent = 'Needs Curation';
+                datasetStatus.style.background = 'var(--color-warning-bg)';
+                datasetStatus.style.color = 'var(--color-warning)';
+
+                statRows.textContent = state.rows;
+                statCols.textContent = state.cols;
+
+                // load all dashboard data
+                await loadDashboardData();
+
+            } catch (err) {
+                console.error('❌ Upload error:', err);
+                showMessage(uploadMessage, `❌ ${err.message}`, true);
+                setStatus('❌ error', false);
+                setFooter('Upload failed');
+            } finally {
+                state.isUploading = false;
+                btnUpload.disabled = false;
+                btnUpload.textContent = 'Analyze Dataset';
+            }
+        });
+
+        // =================================================================
+        //  6. DASHBOARD DATA LOADING (unchanged)
+        // =================================================================
+        async function loadDashboardData() {
+            if (!state.datasetId) return;
+            try {
+                await Promise.all([
+                    loadProfile(),
+                    loadQuality(),
+                    loadMetadata(),
+                    loadHistory(),
+                    loadPreview(),
+                ]);
+                updateProblems();
+                updateScoreRing();
+                updateMetadataCard();
+                updateHistory();
+                setStatus('✅ loaded');
+                setFooter('Dashboard ready');
+            } catch (err) {
+                console.error('Error loading dashboard data:', err);
+                setStatus('⚠️ partial', false);
+                setFooter('Some data could not be loaded');
+            }
+        }
+
+        btnRefreshData.addEventListener('click', () => {
+            if (state.datasetId) {
+                setStatus('⟳ refreshing');
+                loadDashboardData();
+            }
+        });
+
+        async function loadProfile() {
+            const resp = await fetch(`${API_BASE}/dataset/${state.datasetId}/profile`);
+            if (!resp.ok) throw new Error('Profile fetch failed');
+            const data = await resp.json();
+            state.profile = data.profile || [];
+            state.rows = data.rows || state.rows;
+            state.cols = data.columns || state.cols;
+            state.missing = data.missing_count || 0;
+            state.duplicates = data.duplicate_count || 0;
+            statRows.textContent = state.rows;
+            statCols.textContent = state.cols;
+            statMissing.textContent = state.missing;
+            statDuplicates.textContent = state.duplicates;
+            datasetMeta.textContent = `CSV · ${state.rows} records · ${state.cols} columns`;
+            renderProfile(state.profile);
+            state.problems.missing = state.missing;
+            state.problems.duplicates = state.duplicates;
+            if (state.quality) {
+                state.problems.invalid = state.quality.invalid_count || 0;
+                state.problems.inconsistent = state.quality.inconsistent_count || 0;
+            }
+            updateProblems();
+            return data;
+        }
+
+        function renderProfile(profile) {
+            if (!profile || profile.length === 0) {
+                profileBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--color-text-muted);">No profile data.</td></tr>`;
+                return;
+            }
+            let html = '';
+            for (const p of profile) {
+                html += `<tr>
+                    <td><strong>${safeText(p.column)}</strong></td>
+                    <td>${safeText(p.type)}</td>
+                    <td>${safeText(p.missing)}</td>
+                    <td>${safeText(p.unique)}</td>
+                    <td>${safeText(p.min)}</td>
+                    <td>${safeText(p.max)}</td>
+                    <td>${safeText(p.mean)}</td>
+                </tr>`;
+            }
+            profileBody.innerHTML = html;
+        }
+
+        async function loadPreview() {
+            const resp = await fetch(`${API_BASE}/dataset/${state.datasetId}/preview?limit=15`);
+            if (!resp.ok) throw new Error('Preview fetch failed');
+            const data = await resp.json();
+            const cols = data.columns || [];
+            const rows = data.preview || [];
+            state.preview = rows;
+            renderPreview(cols, rows);
+        }
+
+        function renderPreview(cols, rows) {
+            if (!cols.length || !rows.length) {
+                previewHead.innerHTML = '';
+                previewBody.innerHTML = '';
+                previewEmpty.style.display = 'block';
+                return;
+            }
+            previewEmpty.style.display = 'none';
+            let hHtml = '<tr><th class="row-num">#</th>';
+            for (const c of cols) hHtml += `<th>${safeText(c)}</th>`;
+            hHtml += '</tr>';
+            previewHead.innerHTML = hHtml;
+            let bHtml = '';
+            for (const row of rows) {
+                bHtml += `<tr><td class="row-num">${safeText(row.row_index ?? '')}</td>`;
+                for (const c of cols) {
+                    bHtml += `<td>${safeText(row[c] ?? '')}</td>`;
+                }
+                bHtml += '</tr>';
+            }
+            previewBody.innerHTML = bHtml;
+        }
+
+        async function loadQuality() {
+            const resp = await fetch(`${API_BASE}/dataset/${state.datasetId}/quality`);
+            if (!resp.ok) throw new Error('Quality fetch failed');
+            const data = await resp.json();
+            state.quality = data;
+            state.problems.invalid = data.invalid_count || 0;
+            state.problems.inconsistent = data.inconsistent_count || 0;
+            updateScoreRing();
+            return data;
+        }
+
+        function updateScoreRing() {
+            const q = state.quality;
+            if (!q) {
+                scoreNumber.textContent = '0';
+                scoreRing.style.setProperty('--pct', '0%');
+                scoreLabel.textContent = '—';
+                qCompleteness.textContent = '—';
+                qUniqueness.textContent = '—';
+                qValidity.textContent = '—';
+                qConsistency.textContent = '—';
+                return;
+            }
+            const score = Math.round(q.score || 0);
+            scoreNumber.textContent = score;
+            const pct = Math.min(score, 100);
+            scoreRing.style.setProperty('--pct', pct + '%');
+            if (score >= 90) scoreLabel.textContent = '🌟 Excellent';
+            else if (score >= 75) scoreLabel.textContent = '👍 Good Quality';
+            else if (score >= 50) scoreLabel.textContent = '⚠️ Needs Attention';
+            else scoreLabel.textContent = '🔴 Poor Quality';
+            qCompleteness.textContent = (q.completeness || 0) + '%';
+            qUniqueness.textContent = (q.uniqueness || 0) + '%';
+            qValidity.textContent = (q.validity || 0) + '%';
+            qConsistency.textContent = (q.consistency || 0) + '%';
+        }
+
+        function updateProblems() {
+            probMissing.textContent = state.problems.missing || 0;
+            probDuplicates.textContent = state.problems.duplicates || 0;
+            probInvalid.textContent = state.problems.invalid || 0;
+            probInconsistent.textContent = state.problems.inconsistent || 0;
+        }
+
+        async function loadMetadata() {
+            const resp = await fetch(`${API_BASE}/dataset/${state.datasetId}/metadata`);
+            if (!resp.ok) throw new Error('Metadata fetch failed');
+            const data = await resp.json();
+            state.metadata = data;
+            updateMetadataCard();
+            return data;
+        }
+
+        function updateMetadataCard() {
+            const m = state.metadata || {};
+            metaName.textContent = m.dataset_name || state.datasetName || '—';
+            metaFormat.textContent = m.format || 'CSV';
+            metaRows.textContent = m.records || state.rows || '—';
+            metaCols.textContent = m.attributes || state.cols || '—';
+            metaScore.textContent = m.quality_score || (state.quality ? state.quality.score + '%' : '—');
+            metaDate.textContent = m.curated_on || formatDate();
+        }
+
+        async function loadHistory() {
+            const resp = await fetch(`${API_BASE}/dataset/${state.datasetId}/history`);
+            if (!resp.ok) throw new Error('History fetch failed');
+            const data = await resp.json();
+            state.history = data.history || [];
+            updateHistory();
+            return data;
+        }
+
+        function updateHistory() {
+            const hist = state.history || [];
+            if (hist.length === 0) {
+                historyTimeline.innerHTML = `<div class="timeline-item" style="color:var(--color-text-muted);">No history yet.</div>`;
+                return;
+            }
+            let html = '';
+            for (const item of hist) {
+                html += `<div class="timeline-item">${safeText(item)}</div>`;
+            }
+            historyTimeline.innerHTML = html;
+        }
+
+        // =================================================================
+        //  7. CURATION ACTIONS (unchanged)
+        // =================================================================
+        btnClean.addEventListener('click', async () => {
+            if (state.isCleaning) return;
+            if (!state.datasetId) { showActionStatus('No dataset loaded.', true); return; }
+            state.isCleaning = true;
+            btnClean.disabled = true;
+            btnClean.textContent = '⏳ Cleaning...';
+            showActionStatus('⏳ Curating dataset... Removing duplicates, standardizing...', false);
+            setStatus('⏳ cleaning');
+            setFooter('Cleaning in progress...');
+
+            try {
+                const resp = await fetch(`${API_BASE}/dataset/${state.datasetId}/clean`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                });
+                if (!resp.ok) throw new Error('Clean failed');
+                const data = await resp.json();
+                state.cleaningResult = data;
+                await loadQuality();
+                await loadProfile();
+                await loadMetadata();
+                await loadHistory();
+                renderCleaningResults(data);
+                showActionStatus('✅ Curation complete.', false);
+                setStatus('✅ cleaned');
+                setFooter('Cleaning complete');
+                datasetStatus.textContent = 'Curated';
+                datasetStatus.style.background = 'var(--color-success-bg)';
+                datasetStatus.style.color = 'var(--color-success)';
+                state.history.push(`🧹 Cleaned dataset — ${formatDate()}`);
+                updateHistory();
+            } catch (err) {
+                showActionStatus(`❌ ${err.message}`, true);
+                setStatus('❌ error', false);
+                setFooter('Clean failed');
+                console.error(err);
+            } finally {
+                state.isCleaning = false;
+                btnClean.disabled = false;
+                btnClean.textContent = '🧹 Clean Dataset';
+            }
+        });
+
+        function renderCleaningResults(data) {
+            const summary = data.summary || data;
+            let html = `<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px;">`;
+            const items = [
+                ['Duplicate records removed', summary.duplicates_removed ?? 0],
+                ['Whitespace corrections', summary.whitespace_corrected ?? summary.whitespace ?? 0],
+                ['Missing values handled', summary.missing_handled ?? summary.missing ?? 0],
+                ['Invalid values flagged', summary.invalid_flagged ?? summary.invalid ?? 0],
+            ];
+            for (const [label, val] of items) {
+                html += `<div><span class="text-muted">${label}</span><br><strong>${safeText(val)}</strong></div>`;
+            }
+            html += `</div>`;
+            if (summary.before_score !== undefined || summary.after_score !== undefined) {
+                html += `<div style="margin-top:12px; padding-top:12px; border-top:1px solid var(--color-border);">
+                    <span class="text-muted">Quality Score:</span>
+                    <strong>Before ${safeText(summary.before_score)}% → After ${safeText(summary.after_score)}%</strong>
+                </div>`;
+            }
+            cleaningResults.innerHTML = html;
+            cleaningResults.style.background = 'var(--color-success-bg)';
+            cleaningResults.style.borderColor = 'var(--color-success)';
+        }
+
+        btnValidate.addEventListener('click', async () => {
+            if (state.isValidating) return;
+            if (!state.datasetId) { showActionStatus('No dataset loaded.', true); return; }
+            state.isValidating = true;
+            btnValidate.disabled = true;
+            btnValidate.textContent = '⏳ Validating...';
+            showActionStatus('⏳ Running validation checks...', false);
+            setStatus('⏳ validating');
+            setFooter('Validation in progress...');
+
+            try {
+                const resp = await fetch(`${API_BASE}/dataset/${state.datasetId}/validate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                });
+                if (!resp.ok) throw new Error('Validation failed');
+                const data = await resp.json();
+                state.validationResult = data;
+                renderValidationResults(data);
+                showActionStatus('✅ Validation complete.', false);
+                setStatus('✅ validated');
+                setFooter('Validation complete');
+                state.history.push(`✅ Validated dataset — ${formatDate()}`);
+                updateHistory();
+            } catch (err) {
+                showActionStatus(`❌ ${err.message}`, true);
+                setStatus('❌ error', false);
+                setFooter('Validation failed');
+                console.error(err);
+            } finally {
+                state.isValidating = false;
+                btnValidate.disabled = false;
+                btnValidate.textContent = '✔️ Validate Dataset';
+            }
+        });
+
+        function renderValidationResults(data) {
+            const checks = data.checks || data.results || [];
+            let html = '';
+            if (Array.isArray(checks) && checks.length) {
+                html = `<div style="display:grid; gap:8px;">`;
+                for (const c of checks) {
+                    const status = c.status || 'PASS';
+                    const color = status === 'PASS' ? 'var(--color-success)' :
+                        status === 'WARNING' ? 'var(--color-warning)' : 'var(--color-danger)';
+                    html += `<div style="display:flex; gap:12px; align-items:center; padding:4px 0; border-bottom:1px solid var(--color-border);">
+                        <span style="font-weight:600; color:${color}; width:80px;">${status}</span>
+                        <span>${safeText(c.message || c.check || 'Check')}</span>
+                    </div>`;
+                }
+                html += `</div>`;
+            } else {
+                html = `<p style="color:var(--color-text-secondary);">${data.message || 'All checks passed.'}</p>`;
+            }
+            validationResults.innerHTML = html;
+        }
+
+        btnResetCuration.addEventListener('click', () => {
+            state.cleaningResult = null;
+            state.validationResult = null;
+            cleaningResults.innerHTML = `<p style="color:var(--color-text-secondary);">Run a cleaning action to see results here.</p>`;
+            cleaningResults.style.background = 'var(--color-success-bg)';
+            cleaningResults.style.borderColor = 'var(--color-success)';
+            validationResults.innerHTML = `<p style="color:var(--color-text-secondary);">Run validation to see results here.</p>`;
+            showActionStatus('↺ Reset state.', false);
+            setStatus('↺ reset');
+            setFooter('Ready');
+            datasetStatus.textContent = 'Needs Curation';
+            datasetStatus.style.background = 'var(--color-warning-bg)';
+            datasetStatus.style.color = 'var(--color-warning)';
+            loadDashboardData();
+        });
+
+        // =================================================================
+        //  8. EXPORT (unchanged)
+        // =================================================================
+        btnDownloadCSV.addEventListener('click', async () => {
+            if (!state.datasetId) { showActionStatus('No dataset to export.', true); return; }
+            try {
+                setStatus('⏳ downloading');
+                setFooter('Downloading CSV...');
+                const resp = await fetch(`${API_BASE}/dataset/${state.datasetId}/download?format=csv`);
+                if (!resp.ok) throw new Error('Download failed');
+                const blob = await resp.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${state.datasetName || 'curated'}_curated.csv`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+                setStatus('✅ downloaded');
+                setFooter('CSV downloaded');
+                state.history.push(`📥 Exported CSV — ${formatDate()}`);
+                updateHistory();
+            } catch (err) {
+                showActionStatus(`❌ ${err.message}`, true);
+                setStatus('❌ error', false);
+                setFooter('Download failed');
+                console.error(err);
+            }
+        });
+
+        btnDownloadMetadata.addEventListener('click', downloadMetadata);
+        btnDownloadMetadata2.addEventListener('click', downloadMetadata);
+
+        async function downloadMetadata() {
+            if (!state.datasetId) { showActionStatus('No metadata to export.', true); return; }
+            try {
+                setStatus('⏳ downloading');
+                const resp = await fetch(`${API_BASE}/dataset/${state.datasetId}/metadata`);
+                if (!resp.ok) throw new Error('Metadata fetch failed');
+                const data = await resp.json();
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${state.datasetName || 'dataset'}_metadata.json`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+                setStatus('✅ downloaded');
+                setFooter('Metadata downloaded');
+            } catch (err) {
+                showActionStatus(`❌ ${err.message}`, true);
+                setStatus('❌ error', false);
+                setFooter('Metadata download failed');
+                console.error(err);
+            }
+        }
+
+        // =================================================================
+        //  9. INIT
+        // =================================================================
+        sectionUpload.classList.add('active');
+        sectionDashboard.classList.remove('active');
+        setStatus('⏸ idle');
+        setFooter('Ready to upload');
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const demoId = urlParams.get('id');
+        if (demoId) {
+            state.datasetId = demoId;
+            state.uploaded = true;
+            state.datasetName = 'Demo Dataset';
+            sectionUpload.classList.remove('active');
+            sectionDashboard.classList.add('active');
+            datasetName.textContent = state.datasetName;
+            datasetMeta.textContent = `CSV · loading...`;
+            loadDashboardData();
+        }
+
+        console.log('🚀 DataCurate frontend loaded.');
+        console.log('ℹ️  Make sure the backend is running at', API_BASE);
+    </script>
+</body>
+</html>
