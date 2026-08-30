@@ -227,3 +227,9 @@ Because the backend handles file uploads, local data storage, and API processing
 ## Summary
 
 DataCurate is a practical data cleaning and quality inspection tool that helps users turn noisy CSV files into trustworthy, curated datasets with clear quality metrics, validation checks, and a traceable history of actions.
+
+## Credits
+
+Developed by:
+- YaifabaSapamcha
+- anjaliasem2026-git
