@@ -1,157 +1,229 @@
-# DataCurate — Backend
+# DataCurate
 
-An offline-friendly dataset curation and data-quality assessment backend,
-built with FastAPI, pandas, and SQLite. Upload a messy CSV; get a
-structural profile, a four-dimension quality score, a cleaned copy, a
-rule-based validation report, generated metadata, and a full provenance
-history of everything that happened to the dataset.
+DataCurate is a data curation and quality assessment application built to help users upload messy CSV datasets, inspect their structure, clean them, validate consistency, and export the results in a usable format.
 
-## Project layout
+It is designed for people who work with imperfect tabular data and need a practical workflow to identify problems, fix issues safely, and keep an audit trail of every action taken.
 
+## What the app does
+
+DataCurate helps users:
+
+- Upload raw CSV files
+- Inspect dataset shape, columns, missing values, and duplicates
+- Profile each column for type, missing counts, unique values, and summary statistics
+- Calculate a quality score across multiple dimensions
+- Clean common dataset issues such as whitespace, missing-value tokens, duplicate rows, and basic standardization
+- Validate data against rules such as required fields, numeric checks, email checks, and range rules
+- Generate metadata and provenance history
+- Download the curated CSV or metadata JSON
+
+In short, the app turns a messy dataset into a cleaner, more trustworthy dataset with evidence of what changed.
+
+## How it works
+
+The system follows a simple curation workflow:
+
+1. Upload a CSV file
+2. Store the original file safely in the raw data area
+3. Profile the dataset to understand structure and quality issues
+4. Measure quality using a rule-based scoring engine
+5. Clean the dataset without overwriting the original source file
+6. Validate the cleaned data against expected rules
+7. Save metadata and a curation history
+8. Export the curated output for reuse
+
+The backend never destroys the raw upload. Instead, it writes cleaned versions into a separate curated area, which keeps the original dataset intact and makes reprocessing possible.
+
+## Technology stack
+
+### Frontend
+- HTML, CSS, JavaScript
+- Static dashboard UI for upload, preview, quality summaries, actions, and export
+
+### Backend
+- Python
+- FastAPI for API endpoints and request handling
+- Pydantic for request validation and structured schemas
+- Pandas for CSV processing, profiling, and data transformations
+
+### Data and storage
+- SQLite for dataset metadata, quality results, and curation history
+- Local file storage for raw and curated CSV files
+
+### Testing
+- Pytest
+- Automated checks for profiling, quality, cleaning, and validation logic
+
+## Simplified system architecture
+
+```text
++---------------------+
+| User / Browser      |
+| Upload CSV + view   |
+| dashboard + actions |
++----------+----------+
+           |
+           v
++---------------------+
+| Frontend UI         |
+| HTML/CSS/JS         |
+| (upload, preview,   |
+| quality, export)    |
++----------+----------+
+           |
+           v
++---------------------+
+| FastAPI Backend     |
+| /upload             |
+| /profile            |
+| /quality            |
+| /clean              |
+| /validate           |
+| /metadata           |
+| /download           |
++----------+----------+
+           |
+           +----------+-------------------+
+                      |
+                      v
+           +---------------------------+
+           | Business Logic Services   |
+           | - profiler                |
+           | - quality_engine          |
+           | - cleaner                |
+           | - validator              |
+           | - metadata_service        |
+           | - provenance              |
+           +-------------+-------------+
+                         |
+                         v
+           +---------------------------+
+           | Storage Layer             |
+           | - SQLite database         |
+           | - raw CSV files           |
+           | - curated CSV files       |
+           +---------------------------+
 ```
+
+## Project structure
+
+```text
 DataCurate/
 ├── backend/
-│   ├── main.py                 # FastAPI app + route registration
-│   ├── config.py                # paths, upload limits, CORS origins
-│   ├── api/                     # routes only — no business logic
-│   │   ├── upload.py             POST /upload, GET /dataset/{id}, GET /datasets
-│   │   ├── profiling.py          GET /dataset/{id}/profile
-│   │   ├── quality.py            GET /dataset/{id}/quality
-│   │   ├── curation.py           POST /dataset/{id}/clean
-│   │   ├── validation.py         POST /dataset/{id}/validate
-│   │   ├── metadata.py           POST/GET /dataset/{id}/metadata, GET .../history
-│   │   └── export.py             GET /dataset/{id}/download
-│   ├── services/                # all business logic
-│   │   ├── profiler.py           structural profile + type inference
-│   │   ├── quality_engine.py     completeness/uniqueness/validity/consistency
-│   │   ├── cleaner.py            whitespace, missing tokens, dedup, standardize
-│   │   ├── validator.py          rule-based checks (required/numeric/email/range)
-│   │   ├── metadata_service.py   builds the descriptive metadata record
-│   │   └── provenance.py         curation-history logging
+│   ├── main.py
+│   ├── config.py
+│   ├── api/
+│   │   ├── upload.py
+│   │   ├── profiling.py
+│   │   ├── quality.py
+│   │   ├── curation.py
+│   │   ├── validation.py
+│   │   ├── metadata.py
+│   │   └── export.py
+│   ├── services/
+│   │   ├── profiler.py
+│   │   ├── quality_engine.py
+│   │   ├── cleaner.py
+│   │   ├── validator.py
+│   │   ├── metadata_service.py
+│   │   └── provenance.py
 │   ├── database/
-│   │   ├── database.py           all SQL lives here
-│   │   └── schema.sql            datasets / metadata / quality_results / curation_history
-│   ├── models/                  Pydantic request/response schemas
-│   ├── utils/                   file handling, error envelope, shared predicates
+│   │   ├── database.py
+│   │   └── schema.sql
+│   ├── models/
+│   ├── utils/
 │   ├── storage/
-│   │   ├── raw/                  original uploaded CSVs (never modified)
-│   │   └── curated/              cleaned CSVs (separate files — raw is never overwritten)
-│   └── tests/                   pytest unit tests (25 tests)
+│   │   ├── raw/
+│   │   └── curated/
+│   └── tests/
+├── frontend/
+│   └── index.html
 ├── datasets/
-│   └── student_raw.csv          sample messy dataset for demoing the API
-├── conftest.py                  lets `pytest` find the backend package from repo root
-└── requirements.txt
+│   └── student_raw.csv
+├── conftest.py
+├── requirements.txt
+├── README.md
+└── .gitignore
 ```
 
-## Setup
+## Key data quality features
+
+The project evaluates data quality across four dimensions:
+
+- Completeness
+- Uniqueness
+- Validity
+- Consistency
+
+These are combined into an overall score so users can see how healthy a dataset is before and after curation.
+
+## Data handling approach
+
+A few important design choices make the app reliable:
+
+- CSV files are read as strings to avoid silent type coercion
+- Duplicate rows are removed intentionally and transparently
+- Missing-value tokens such as "na", "null", and "n/a" are normalized consistently
+- Cleaning is explicit and conservative rather than guessing values
+- Validation catches rule violations instead of silently altering data
+- Provenance logs preserve a record of everything done to the dataset
+
+## Local setup
 
 ```bash
 cd DataCurate
-python3 -m venv .venv
-source .venv/bin/activate        # Windows: .venv\Scripts\activate
+python -m venv .venv
+.venv\Scripts\activate    # On macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Run the server
+## Run the backend
 
 ```bash
 uvicorn backend.main:app --reload
 ```
 
-The API is now at `http://127.0.0.1:8000`. Interactive docs (Swagger UI)
-are auto-generated by FastAPI at `http://127.0.0.1:8000/docs`.
+Then open the API docs at:
 
-The SQLite database and `storage/raw` / `storage/curated` folders are
-created automatically on first startup.
+- http://127.0.0.1:8000/docs
 
-## Run the tests
+## Run tests
 
 ```bash
 pytest backend/tests/ -v
 ```
 
-25 tests cover the profiler, quality engine, cleaner, and validator in
-isolation (no server needs to be running).
-
-## Try it end-to-end
+## Example workflow
 
 ```bash
-# 1. Upload the sample dataset
+# Upload the sample dataset
 curl -X POST -F "file=@datasets/student_raw.csv" http://127.0.0.1:8000/upload
-# -> {"success": true, "dataset_id": 1, "filename": "student_raw.csv", "rows": 8, "columns": 5}
 
-# 2. Structural profile
+# Get profile information
 curl http://127.0.0.1:8000/dataset/1/profile
 
-# 3. Quality score (completeness / uniqueness / validity / consistency / overall)
+# Get quality score
 curl http://127.0.0.1:8000/dataset/1/quality
 
-# 4. Clean it (writes storage/curated/dataset_1_curated.csv — raw file is untouched)
+# Clean the dataset
 curl -X POST http://127.0.0.1:8000/dataset/1/clean
 
-# 5. Quality again — now scored against the curated file, so the numbers
-#    actually move (uniqueness jumps once the duplicate row is gone, etc.)
-curl http://127.0.0.1:8000/dataset/1/quality
+# Validate the dataset
+curl -X POST http://127.0.0.1:8000/dataset/1/validate
 
-# 6. Validate with your own rules (optional — auto-detects if you omit the body)
-curl -X POST http://127.0.0.1:8000/dataset/1/validate \
-  -H "Content-Type: application/json" \
-  -d '{"required": ["Name","Email"], "numeric": ["Age"], "email": ["Email"], "range": {"Age":[0,120]}}'
-
-# 7. Generate metadata
-curl -X POST http://127.0.0.1:8000/dataset/1/metadata \
-  -H "Content-Type: application/json" \
-  -d '{"creator": "Your Name", "description": "Curated student dataset", "source": "Classroom demo"}'
-
-# 8. Full provenance trail
-curl http://127.0.0.1:8000/dataset/1/history
-
-# 9. Download the curated CSV
+# Download the curated CSV
 curl http://127.0.0.1:8000/dataset/1/download -o curated.csv
 ```
 
-## Design notes worth knowing for a viva
+## Deployment note
 
-- **CSVs are read with `dtype=str` everywhere.** Every cell is a string or
-  `NaN` — the backend does its own type/format inference (`profiler.py`)
-  and validation (`validator.py`) instead of trusting pandas to silently
-  guess column types on read, which can hide bad data.
-- **The cleaner never invents values.** `"twenty"` in an age column is never
-  auto-corrected to `20` — the cleaner only fixes whitespace, normalizes an
-  explicit set of missing-value tokens (`""`, `"na"`, `"n/a"`, `"null"`,
-  `"none"`, `"-"`, `"--"`), removes exact duplicate rows, and applies a
-  small, explicit standardization map (currently just `gender`). Bad values
-  are the validator's job to *flag*, not the cleaner's job to *guess*.
-- **Raw files are immutable.** `POST /clean` always writes a new file under
-  `storage/curated/`; the original upload under `storage/raw/` is never
-  touched, so you can always re-run cleaning from scratch.
-- **`/profile`, `/quality`, and `/validate` all prefer the curated file**
-  once one exists, falling back to the raw upload otherwise. That's what
-  makes calling `/quality` again after `/clean` show real improvement.
-- **The four quality dimensions and their weights**
-  (completeness 30% / uniqueness 25% / validity 25% / consistency 20%) are
-  this project's own scoring model, not an industry standard — worth
-  saying explicitly if asked.
-- **Validation rules are configurable.** Send a JSON body to
-  `POST /validate` (`required`, `numeric`, `email`, `range`) to override
-  which columns get checked; omit it and columns are auto-classified
-  (≥80% of a column's non-null values parse as numeric → treated as
-  numeric; a column named `*email*` → treated as email).
-- **Every operation is logged** to `curation_history` via
-  `services/provenance.py`, so `GET /dataset/{id}/history` reconstructs
-  exactly what happened to a dataset and when.
-- **Errors use one consistent envelope**:
-  `{"success": false, "error": {"code": "...", "message": "..."}}`
-  (see `utils/errors.py` for the error codes in use).
+This project is best suited for a split deployment model:
 
-## A pandas-version gotcha (already fixed, worth knowing)
+- Frontend: static host such as Vercel, Netlify, or GitHub Pages
+- Backend: Python hosting service such as Render, Railway, Fly.io, or a VPS
 
-This environment ships **pandas 3.0**, where plain text columns no longer
-default to `dtype == object` — they get pandas' newer dedicated string
-dtype instead. A naive `df[column].dtype == object` check (which plenty of
-pandas tutorials still use) silently matches *no* columns on this version,
-which quietly turned the cleaner's whitespace/missing-token steps into
-no-ops. `services/cleaner.py` uses `pandas.api.types.is_string_dtype()`
-instead, which is correct on both older and newer pandas. If you deploy
-this on an older pandas version, no change is needed — the same check
-still works there too.
+Because the backend handles file uploads, local data storage, and API processing, it cannot run as a pure static site on GitHub Pages alone.
+
+## Summary
+
+DataCurate is a practical data cleaning and quality inspection tool that helps users turn noisy CSV files into trustworthy, curated datasets with clear quality metrics, validation checks, and a traceable history of actions.
