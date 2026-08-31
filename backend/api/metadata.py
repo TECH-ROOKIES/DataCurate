@@ -41,12 +41,24 @@ def create_metadata(dataset_id: int, payload: MetadataRequest):
 
 @router.get("/dataset/{dataset_id}/metadata")
 def get_metadata(dataset_id: int):
-    get_dataset_or_404(dataset_id)
+    dataset = get_dataset_or_404(dataset_id)
     metadata = database.get_metadata(dataset_id)
+    
+    # Auto-generate metadata if it doesn't exist yet
     if not metadata:
-        raise APIError(
-            "INVALID_DATASET", "No metadata has been generated for this dataset yet.", status_code=404
+        auto_metadata = build_metadata(
+            dataset_name=dataset["name"],
+            file_format=dataset["format"],
+            rows=dataset["rows"],
+            columns=dataset["columns"],
+            quality_score=dataset.get("quality_score", 0),
+            creator="System",
+            description="Auto-generated metadata",
+            source="uploaded",
+            version="1.0.0",
         )
+        return auto_metadata
+    
     return metadata
 
 

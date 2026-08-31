@@ -1514,27 +1514,51 @@
         // ============================================================
         async function loadDashboardData() {
             if (!state.datasetId) return;
+            console.log('📊 Loading dashboard data for dataset:', state.datasetId);
+            
+            const results = await Promise.allSettled([
+                loadProfile(),
+                loadQuality(),
+                loadMetadata(),
+                loadHistory(),
+                loadPreview(),
+            ]);
+
+            // Log results
+            const endpoints = ['Profile', 'Quality', 'Metadata', 'History', 'Preview'];
+            let hasError = false;
+            results.forEach((result, idx) => {
+                if (result.status === 'rejected') {
+                    console.error(`❌ ${endpoints[idx]} failed:`, result.reason);
+                    hasError = true;
+                } else {
+                    console.log(`✅ ${endpoints[idx]} loaded successfully`);
+                }
+            });
+
+            // Update UI even if some data failed
             try {
-                await Promise.all([
-                    loadProfile(),
-                    loadQuality(),
-                    loadMetadata(),
-                    loadHistory(),
-                    loadPreview(),
-                ]);
                 updateScoreRing();
                 updateProblems();
                 updateMetadataCard();
                 updateHistory();
             } catch (err) {
-                console.error('Dashboard load error:', err);
-                showActionStatus('⚠️ Some data could not be loaded', 'error');
+                console.error('UI update error:', err);
+            }
+
+            if (hasError) {
+                showActionStatus('⚠️ Some data could not be loaded - check browser console for details', 'error');
             }
         }
 
         async function loadProfile() {
-            const resp = await fetch(`${API_BASE}/dataset/${state.datasetId}/profile`);
-            if (!resp.ok) throw new Error('Profile load failed');
+            const url = `${API_BASE}/dataset/${state.datasetId}/profile`;
+            console.log('🔄 Fetching Profile:', url);
+            const resp = await fetch(url);
+            if (!resp.ok) {
+                const errText = await resp.text();
+                throw new Error(`Profile (${resp.status}): ${errText}`);
+            }
             const data = await resp.json();
             state.profile = data.profile || [];
             state.rows = data.rows || state.rows;
@@ -1572,8 +1596,13 @@
         }
 
         async function loadPreview() {
-            const resp = await fetch(`${API_BASE}/dataset/${state.datasetId}/preview?limit=10`);
-            if (!resp.ok) throw new Error('Preview load failed');
+            const url = `${API_BASE}/dataset/${state.datasetId}/preview?limit=10`;
+            console.log('🔄 Fetching Preview:', url);
+            const resp = await fetch(url);
+            if (!resp.ok) {
+                const errText = await resp.text();
+                throw new Error(`Preview (${resp.status}): ${errText}`);
+            }
             const data = await resp.json();
             renderPreview(data.columns || [], data.preview || []);
         }
@@ -1604,8 +1633,13 @@
         }
 
         async function loadQuality() {
-            const resp = await fetch(`${API_BASE}/dataset/${state.datasetId}/quality`);
-            if (!resp.ok) throw new Error('Quality load failed');
+            const url = `${API_BASE}/dataset/${state.datasetId}/quality`;
+            console.log('🔄 Fetching Quality:', url);
+            const resp = await fetch(url);
+            if (!resp.ok) {
+                const errText = await resp.text();
+                throw new Error(`Quality (${resp.status}): ${errText}`);
+            }
             const data = await resp.json();
             state.quality = data;
             state.problems.invalid = data.invalid_count || 0;
@@ -1663,8 +1697,13 @@
         }
 
         async function loadMetadata() {
-            const resp = await fetch(`${API_BASE}/dataset/${state.datasetId}/metadata`);
-            if (!resp.ok) throw new Error('Metadata load failed');
+            const url = `${API_BASE}/dataset/${state.datasetId}/metadata`;
+            console.log('🔄 Fetching Metadata:', url);
+            const resp = await fetch(url);
+            if (!resp.ok) {
+                const errText = await resp.text();
+                throw new Error(`Metadata (${resp.status}): ${errText}`);
+            }
             const data = await resp.json();
             state.metadata = data;
             return data;
@@ -1681,8 +1720,13 @@
         }
 
         async function loadHistory() {
-            const resp = await fetch(`${API_BASE}/dataset/${state.datasetId}/history`);
-            if (!resp.ok) throw new Error('History load failed');
+            const url = `${API_BASE}/dataset/${state.datasetId}/history`;
+            console.log('🔄 Fetching History:', url);
+            const resp = await fetch(url);
+            if (!resp.ok) {
+                const errText = await resp.text();
+                throw new Error(`History (${resp.status}): ${errText}`);
+            }
             const data = await resp.json();
             state.history = data.history || [];
             return data;
